@@ -1,0 +1,14 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_static admin_modify %}
+{% load url from future %}
+{% load admin_urls %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=OrderOpts.app_label %}">{{ OrderOpts.app_label|capfirst|escape }}</a>
+&rsaquo; {% if has_change_permission_for_order %}<a href="{% url OrderOpts|admin_urlname:'changelist' %}">{{ OrderOpts.verbose_name_plural|capfirst }}</a>{% else %}{{ OrderOpts.verbose_name_plural|capfirst }}{% endif %}
+&rsaquo; <a href="{% url OrderOpts|admin_urlname:'change' Order.pk %}">{{ Order|truncatewords:"18" }}</a>
+&rsaquo; Line Item: {{ line_item }}
+</div>
+{% endblock %}

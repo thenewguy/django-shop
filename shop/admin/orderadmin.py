@@ -62,6 +62,20 @@ class ExtraOrderItemPriceFieldInline(LocalizeDecimalFieldsMixin, admin.TabularIn
 class OrderItemAdmin(LocalizeDecimalFieldsMixin, ModelAdmin):
     inlines = (ExtraOrderItemPriceFieldInline,)
     
+    fields = ("order_pk", "line_item")
+    readonly_fields = fields
+    
+    def order_pk(self, obj):
+        return obj.order.pk
+    order_pk.short_description = 'order'
+    
+    def line_item(self, obj):
+        for i, pk in enumerate(OrderItem.objects.filter(order=obj.order).values_list('pk', flat=True), start=1):
+            if pk == obj.pk:
+                return u"%s" % i
+        return u"Unknown"
+    
+    
     def get_model_perms(self, request):
         """
         Return empty perms dict thus hiding the model from admin index.
@@ -69,15 +83,22 @@ class OrderItemAdmin(LocalizeDecimalFieldsMixin, ModelAdmin):
         return {}
     
     def change_view(self, request, object_id, extra_context=None):
+        item = self.get_object(request, unquote(object_id))
+        order = item.order
+        OrderOpts = order._meta
+        has_change_permission_for_order =  request.user.has_perm(OrderOpts.app_label + '.' + OrderOpts.get_change_permission())
         context = {
-            'is_popup': True,
+            'OrderItem': item,
+            'Order': order,
+            'OrderOpts': OrderOpts,
+            'has_change_permission_for_order': has_change_permission_for_order,
+            'line_item': self.line_item(item)
         }
         context.update(extra_context or {})
         
         response = super(OrderItemAdmin, self).change_view(request, object_id, extra_context=context)
         
         if isinstance(response, HttpResponseRedirect):
-            item = self.get_object(request, unquote(object_id))
             if item:
                 order = item.order
                 to = reverse("admin:%s_%s_change" % (
