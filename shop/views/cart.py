@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 
@@ -7,6 +8,7 @@ from shop.models.productmodel import Product
 from shop.util.cart import get_or_create_cart
 from shop.views import ShopView, ShopTemplateResponseMixin
 
+use_is_ajax = getattr(settings, 'SHOP_USE_IS_AJAX', True)
 
 class CartItemDetail(ShopView):
     """
@@ -68,7 +70,7 @@ class CartItemDetail(ShopView):
         """
         Generic hook by default redirects to cart
         """
-        if self.request.is_ajax():
+        if self.request.is_ajax() and use_is_ajax:
             return HttpResponse('Ok<br />')
         else:
             return HttpResponseRedirect(reverse('cart'))
