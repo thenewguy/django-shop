@@ -50,12 +50,21 @@ class OrderItemInline(LocalizeDecimalFieldsMixin, admin.TabularInline):
     ExtraOrderItemPriceFieldList.allow_tags = True
     ExtraOrderItemPriceFieldList.short_description = 'Line Extras'
 
+
 class ExtraOrderItemPriceFieldInline(LocalizeDecimalFieldsMixin, admin.TabularInline):
     model = ExtraOrderItemPriceField
     extra = 0
-    
+
+
 class OrderItemAdmin(LocalizeDecimalFieldsMixin, ModelAdmin):
     inlines = (ExtraOrderItemPriceFieldInline,)
+    
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        return {}
+
 
 class OrderAdmin(LocalizeDecimalFieldsMixin, ModelAdmin):
     list_display = ('id', 'user', 'status', 'order_total', 'created')
