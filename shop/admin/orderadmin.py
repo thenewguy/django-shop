@@ -1,7 +1,10 @@
 #-*- coding: utf-8 -*-
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 from django.core.urlresolvers import reverse
 from django.contrib import admin
 from django.contrib.admin.options import ModelAdmin
+from django.contrib.admin.util import unquote
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from shop.admin.mixins import LocalizeDecimalFieldsMixin
@@ -64,6 +67,28 @@ class OrderItemAdmin(LocalizeDecimalFieldsMixin, ModelAdmin):
         Return empty perms dict thus hiding the model from admin index.
         """
         return {}
+    
+    def change_view(self, request, object_id, extra_context=None):
+        context = {
+            'is_popup': True,
+        }
+        context.update(extra_context or {})
+        
+        response = super(OrderItemAdmin, self).change_view(request, object_id, extra_context=context)
+        
+        if isinstance(response, HttpResponseRedirect):
+            item = self.get_object(request, unquote(object_id))
+            if item:
+                order = item.order
+                to = reverse("admin:%s_%s_change" % (
+                        order._meta.app_label,
+                        order._meta.module_name
+                     ),
+                     args=(order.pk,)
+                )
+                response = redirect(to)
+        
+        return response
 
 
 class OrderAdmin(LocalizeDecimalFieldsMixin, ModelAdmin):
