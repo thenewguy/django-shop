@@ -9,7 +9,8 @@ MODEL_PK_MAP_DEFAULT = getattr(settings, 'SHOP_MODEL_PK_MAP_DEFAULT', None)
 class ShopModelBaseClass(ModelBase):
     def _prepare(self):
         if self._meta.pk is None:
-            data = MODEL_PK_MAP.get(self.__name__, MODEL_PK_MAP_DEFAULT)
+            key = "%s.%s" % (self._meta.app_label, self.__name__)
+            data = MODEL_PK_MAP.get(key, MODEL_PK_MAP_DEFAULT)
             if data is not None:
                 if isinstance(data, basestring):
                     data = {"class": data}
