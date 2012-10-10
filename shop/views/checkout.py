@@ -9,7 +9,6 @@ from django.http import HttpResponseRedirect
 from shop.forms import BillingShippingForm
 from shop.models import AddressModel
 from shop.models.ordermodel import Order
-from shop.order_signals import completed
 from shop.util.address import (
     assign_address_to_request,
     get_billing_address_from_request,
@@ -210,21 +209,14 @@ class ThankYouView(LoginMixin, ShopTemplateView):
     def get_context_data(self, **kwargs):
         ctx = super(ShopTemplateView, self).get_context_data(**kwargs)
 
-        # Set the order status:
+        # put the latest order in the context only if it is completed
         order = get_order_from_request(self.request)
-        if order:
-            order.status = Order.COMPLETED
-            order.save()
-            completed.send(sender=self, order=order)
-        else:
-            order = Order.objects.get_latest_for_user(self.request.user)
-            #TODO: Is this ever the case?
-        ctx.update({'order': order, })
-
-        # Empty the customers basket, to reflect that the purchase was
-        # completed
-        cart_object = get_or_create_cart(self.request)
-        cart_object.empty()
+        if order and order.status == Order.COMPLETED:
+            ctx.update({'order': order, })
+            # Empty the customers basket, to reflect that the purchase was
+            # completed
+            cart_object = get_or_create_cart(self.request)
+            cart_object.empty()
 
         return ctx
 

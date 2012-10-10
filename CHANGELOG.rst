@@ -1,12 +1,27 @@
 Version NEXT
-==============
+============
 
+* 
+
+Version 0.1.1
+=============
+
+* Changed CurrencyField default decimal precision back to 2
+
+Version 0.1.0
+=============
+
+* Bumped the CurrencyField precision limitation to 30 max_digits and 10 decimal
+  places, like it should have been since the beginning.
 * Made Backends internationalizable, as well as the BillingShippingForm
   thanks to the introduciton of a new optional backend_verbose_name attribute
   to backends.
-* Added a order_required decorator to fix bug #84
+* Added order_required decorator to fix bug #84, which should be used on all 
+  payment and shipping views
+* Added cart_required decorator that checks for a cart on the checkout view #172
 * Added get_product_reference method to Product (for extensibility)
 * Cart object is not saved to database if it is empty (#147)
+* Before adding items to cart you now have to use get_or_create_cart with save=True
 * Changed spelling mistakes in methods from `payed` to `paid` on the Order 
   model and on the API. This is potentially not backwards compatible in some 
   border cases.
@@ -16,6 +31,10 @@ Version NEXT
   are handled with the correct localization.
 * Order status is now directly modified in the shop API
 * CartItem URLs were too greedy, they now match less.
+* In case a user has two carts, one bound to the session and one to the user, 
+  the one from the session will be used (#169)
+* Fixed circular import errors by moving base models to shop.models_bases and 
+  base managers to shop.models_bases.managers
 
 Version 0.0.13
 ==============

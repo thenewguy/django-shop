@@ -1,14 +1,17 @@
 #-*- coding: utf-8 -*-
 from decimal import Decimal
+from django.conf import settings
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test.testcases import TestCase
 
 from shop.addressmodel.models import Country, Address
+from shop.models import Product
 from shop.models.cartmodel import Cart
 from shop.models.ordermodel import Order
 from shop.order_signals import processing
+from shop.payment.api import PaymentAPI
 from shop.tests.util import Mock
 from shop.tests.utils.context_managers import SettingsOverride
 from shop.views.checkout import CheckoutSelectionView, ThankYouView
@@ -23,6 +26,9 @@ class ShippingBillingViewTestCase(TestCase):
                                         last_name="Toto")
         self.country = Country.objects.create(name="Switzerland")
         self.address = Address.objects.create(country=self.country)
+        self.cart = Cart.objects.create()
+        self.product = Product.objects.create(name='pizza', active=True, unit_price='1.25')
+        self.cart.add_product(self.product)
         self.request = Mock()
         setattr(self.request, 'user', self.user)
         setattr(self.request, 'session', {})
@@ -134,9 +140,27 @@ class ShippingBillingViewTestCase(TestCase):
     #==========================================================================
     def test_must_be_logged_in_if_setting_is_true(self):
         with SettingsOverride(SHOP_FORCE_LOGIN=True):
+            # force creating of session
+            # https://code.djangoproject.com/ticket/11475
+            self.client.cookies[settings.SESSION_COOKIE_NAME] = '1'
+            self.client.get(reverse('shop_welcome'))
+
+            # save a non-empty cart in the session
+            session = self.client.session
+            session['cart_id'] = self.cart.pk
+            session.save()
+
             resp = self.client.get(reverse('checkout_selection'))
             self.assertEqual(resp.status_code, 302)
             self.assertTrue('accounts/login/' in resp._headers['location'][1])
+
+    #==========================================================================
+    # Cart Required Decorator
+    #==========================================================================
+    def test_cart_required_redirects_on_checkout(self):
+        resp = self.client.get(reverse('checkout_selection'))
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual('http://testserver/', resp._headers['location'][1])
 
 
 class ShippingBillingViewOrderStuffTestCase(TestCase):
@@ -229,18 +253,22 @@ class CheckoutCartToOrderTestCase(TestCase):
 
 
 class ThankYouViewTestCase(TestCase):
+
     def setUp(self):
         self.user = User.objects.create(username="test",
                                         email="test@example.com",
                                         first_name="Test",
                                         last_name="Toto")
         self.request = Mock()
+        self.order = Order.objects.create(user=self.user, order_total=10)
         setattr(self.request, 'user', self.user)
         setattr(self.request, 'session', {})
         setattr(self.request, 'method', 'GET')
-        self.order = Order.objects.create(user=self.user)
 
     def test_get_context_gives_correct_order(self):
+        # first send the order through the payment API
+        PaymentAPI().confirm_payment(self.order, 10, 'None', 'magic payment')
+        # then call the view
         view = ThankYouView(request=self.request)
         self.assertNotEqual(view, None)
         res = view.get_context_data()

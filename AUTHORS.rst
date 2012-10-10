@@ -27,11 +27,13 @@ CONTRIBUTORS
 * Per Rosengren
 * Raúl Cumplido
 * Rolo Mawlabaux
+* Simon Luijk
 * Stephen Muss
 * Thomas Woolford
 
 TRANSLATORS
 ===========
 
+* Mikhail Kolesnik (Russian)
 * Pavel Zhukov (Russian)
 * Pedro Gracia (Spanish)
