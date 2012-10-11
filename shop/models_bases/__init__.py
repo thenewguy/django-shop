@@ -8,6 +8,7 @@ from django.db.models.aggregates import Sum
 from django.utils.translation import ugettext_lazy as _
 from polymorphic.polymorphic_model import PolymorphicModel
 from shop.cart.modifiers_pool import cart_modifiers_pool
+from shop.models.base import ShopModelBase
 from shop.util.fields import CurrencyField
 from shop.util.loader import get_model_string
 import django
@@ -66,7 +67,7 @@ class BaseProduct(PolymorphicModel):
 #==============================================================================
 # Carts
 #==============================================================================
-class BaseCart(models.Model):
+class BaseCart(ShopModelBase):
     """
     This should be a rather simple list of items. Ideally it should be bound to
     a session and not to a User is we want to let people buy from our shop
@@ -257,7 +258,7 @@ class BaseCart(models.Model):
         return sum([ci.quantity for ci in self.items.all()])
 
 
-class BaseCartItem(models.Model):
+class BaseCartItem(ShopModelBase):
     """
     This is a holder for the quantity of items in the cart and, obviously, a
     pointer to the actual Product being purchased :)
@@ -302,7 +303,7 @@ class BaseCartItem(models.Model):
 #==============================================================================
 # Orders
 #==============================================================================
-class BaseOrder(models.Model):
+class BaseOrder(ShopModelBase):
     """
     A model representing an Order.
 
@@ -420,7 +421,7 @@ if LooseVersion(django.get_version()) >= LooseVersion('1.3'):
     f_kwargs['on_delete'] = models.SET_NULL
 
 
-class BaseOrderItem(models.Model):
+class BaseOrderItem(ShopModelBase):
     """
     A line Item for an order.
     """

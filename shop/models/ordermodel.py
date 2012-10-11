@@ -8,7 +8,7 @@ from shop.models.productmodel import Product
 from shop.util.fields import CurrencyField
 from shop.util.loader import load_class
 import django
-
+from base import ShopModelBase
 
 #==============================================================================
 # Extensibility
@@ -37,7 +37,7 @@ if LooseVersion(django.get_version()) < LooseVersion('1.3'):
     pre_delete.connect(clear_products, sender=Product)
 
 
-class OrderExtraInfo(models.Model):
+class OrderExtraInfo(ShopModelBase):
     """
     A holder for extra textual information to attach to this order.
     """
@@ -51,7 +51,7 @@ class OrderExtraInfo(models.Model):
         verbose_name_plural = _('Order extra info')
 
 
-class ExtraOrderPriceField(models.Model):
+class ExtraOrderPriceField(ShopModelBase):
     """
     This will make Cart-provided extra price fields persistent since we want
     to "snapshot" their statuses at the time when the order was made
@@ -69,7 +69,7 @@ class ExtraOrderPriceField(models.Model):
         verbose_name_plural = _('Extra order price fields')
 
 
-class ExtraOrderItemPriceField(models.Model):
+class ExtraOrderItemPriceField(ShopModelBase):
     """
     This will make Cart-provided extra price fields persistent since we want
     to "snapshot" their statuses at the time when the order was made
@@ -84,7 +84,7 @@ class ExtraOrderItemPriceField(models.Model):
         verbose_name_plural = _('Extra order item price fields')
 
 
-class OrderPayment(models.Model):
+class OrderPayment(ShopModelBase):
     """
     A class to hold basic payment information. Backends should define their own
     more complex payment types should they need to store more informtion
