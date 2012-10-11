@@ -113,9 +113,9 @@ class OrderItemAdmin(LocalizeDecimalFieldsMixin, ModelAdmin):
 
 
 class OrderAdmin(LocalizeDecimalFieldsMixin, ModelAdmin):
-    list_display = ('id', 'user', 'status', 'order_total', 'created')
+    list_display = ('pk', 'user', 'status', 'order_total', 'created')
     list_filter = ('status', 'user')
-    search_fields = ('id', 'shipping_address_text', 'user__username')
+    search_fields = ('pk', 'shipping_address_text', 'user__username')
     date_hierarchy = 'created'
     inlines = (OrderItemInline, OrderExtraInfoInline,
             ExtraOrderPriceFieldInline, OrderPaymentInline)
