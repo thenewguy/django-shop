@@ -26,6 +26,9 @@ class OrderDetailView(ShopDetailView):
     Display order for logged in user.
     """
     queryset = Order.objects.all()
+    
+    def get_slug_field(self):
+        return Order.get_slug_field()
 
     def get_queryset(self):
         queryset = super(OrderDetailView, self).get_queryset()

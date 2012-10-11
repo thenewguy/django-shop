@@ -6,7 +6,7 @@ urlpatterns = patterns('',
     url(r'^$',
         OrderListView.as_view(),
         name='order_list'),
-    url(r'^(?P<pk>\d+)/$',
+    url(r'^(?P<slug>.+?)/$',
         OrderDetailView.as_view(),
         name='order_detail'),
     )

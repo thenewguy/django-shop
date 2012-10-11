@@ -351,10 +351,10 @@ class BaseOrder(models.Model):
         verbose_name_plural = _('Orders')
 
     def __unicode__(self):
-        return _('Order ID: %(id)s') % {'id': self.id}
+        return _('Order ID: %(id)s') % {'id': self.slug}
 
     def get_absolute_url(self):
-        return reverse('order_detail', kwargs={'pk': self.pk})
+        return reverse('order_detail', kwargs={'slug': self.slug})
 
     def is_paid(self):
         """Has this order been integrally paid for?"""
@@ -378,6 +378,14 @@ class BaseOrder(models.Model):
         return result
     amount_payed = amount_paid #Backward compatability, deprecated spelling
 
+    @classmethod
+    def get_slug_field(cls):
+        return "pk"
+    
+    @property
+    def slug(self):
+        return getattr(self, self.get_slug_field())
+    
     @property
     def shipping_costs(self):
         from shop.models import ExtraOrderPriceField
