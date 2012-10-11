@@ -21,9 +21,8 @@ class Cart(InclusionTag):
     def get_context(self, context):
         cart = get_or_create_cart(context['request'])
         cart.update()
-        return {
-            'cart': cart
-        }
+        context['cart'] = cart
+        return context
 register.tag(Cart)
 
 
@@ -37,9 +36,8 @@ class Order(InclusionTag):
         )
 
     def get_context(self, context, order):
-        return {
-            'order': order
-        }
+        context['order'] = order
+        return context
 register.tag(Order)
 
 
