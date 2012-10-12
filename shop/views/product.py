@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 from shop.models.productmodel import Product
-from shop.views import ShopDetailView
+from shop.views import ShopListView, ShopDetailView
 
+class ProductListView(ShopListView):
+    def get_queryset(self):
+        qs = super(ProductListView, self).get_queryset()
+        return qs.filter(active=True)
 
 class ProductDetailView(ShopDetailView):
     """
